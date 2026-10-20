@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Patients - Healthcare System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #2d2640;
+      --soft: #8a84a3;
+      --violet: #8b6cf0;
+      --pink: #f0a6f5;
+      --line: #e6e0f7;
+    }
+    body {
+      font-family: 'Poppins', system-ui, sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 10% 10%, #ffe9f1 0, transparent 40%),
+        radial-gradient(circle at 90% 20%, #e8eeff 0, transparent 40%),
+        radial-gradient(circle at 80% 90%, #dcf7ec 0, transparent 40%),
+        #fbf9ff;
+    }
+    h1, .brand { font-family: 'DM Serif Display', Georgia, serif; }
+
+    .topbar { background: rgba(255,255,255,.7); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+    .brand { font-size: 1.6rem; color: var(--ink); text-decoration: none; }
+    .brand span { color: var(--violet); }
+    .topbar .nav-link { color: var(--soft); font-weight: 500; border-radius: 999px; padding: .45rem 1.1rem; }
+    .topbar .nav-link:hover { color: var(--ink); }
+    .topbar .nav-link.active { color: #fff; background: linear-gradient(135deg, var(--violet), var(--pink)); }
+
+    h1 { font-size: 2.4rem; margin: 2rem 0 1.2rem; }
+
+    .card-soft {
+      background: rgba(255,255,255,.85);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(139,108,240,.08);
+    }
+    .form-control { border-radius: 14px; border-color: var(--line); padding: .65rem 1rem; }
+    .form-control:focus { border-color: var(--violet); box-shadow: 0 0 0 .25rem rgba(139,108,240,.18); }
+
+    .btn-grad {
+      background: linear-gradient(135deg, var(--violet), var(--pink));
+      color: #fff; border: 0; border-radius: 999px; font-weight: 600; padding: .65rem 1.2rem;
+    }
+    .btn-grad:hover { color: #fff; filter: brightness(.95); }
+    .btn-mini { border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--soft); font-size: .85rem; padding: .3rem .9rem; }
+    .btn-mini:hover { border-color: var(--violet); color: var(--violet); }
+    .btn-mini.del:hover { border-color: #d92d4a; color: #d92d4a; }
+
+    table { margin: 0; }
+    thead th { color: var(--violet); font-size: .8rem; font-weight: 600; border-bottom: 1px solid var(--line) !important; padding: 1rem 1.25rem; }
+    tbody td { padding: .9rem 1.25rem; vertical-align: middle; border-color: var(--line); }
+    .empty { text-align: center; color: var(--soft); padding: 2rem; }
+
+    #message { position: fixed; top: 1rem; right: 1rem; z-index: 3000; max-width: 360px; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between py-3">
+      <a class="brand" href="index.html"><span>&#10047;</span> Healthcare System</a>
+      <div class="nav">
+        <a class="nav-link" href="index.html">Dashboard</a>
+        <a class="nav-link active" href="patients.html">Patients</a>
+        <a class="nav-link" href="doctors.html">Doctors</a>
+        <a class="nav-link" href="appointments.html">Appointments</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container pb-5">
+    <h1>Patients</h1>
+    <div id="message"></div>
+
+    <div class="card-soft p-3 mb-4">
+      <form id="patientForm" class="row g-2">
+        <input type="hidden" id="patientId">
+        <div class="col-md-4"><input type="text" id="name" class="form-control" placeholder="Full name" required></div>
+        <div class="col-md-3"><input type="date" id="birthdate" class="form-control" required></div>
+        <div class="col-md-3"><input type="text" id="contact" class="form-control" placeholder="Contact number"></div>
+        <div class="col-md-2 d-flex gap-1">
+          <button type="submit" class="btn btn-grad flex-grow-1" id="saveBtn">Add</button>
+          <button type="button" class="btn btn-mini" id="cancelBtn" onclick="resetForm()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card-soft overflow-hidden">
+      <div class="table-responsive">
+        <table class="table">
+          <thead><tr><th>ID</th><th>NAME</th><th>BIRTHDATE</th><th>CONTACT</th><th class="text-end">ACTIONS</th></tr></thead>
+          <tbody id="patientTable"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty d-none">No patients yet. Add one using the form above.</div>
+    </div>
+  </div>
+
+  <script>
+    var API = '/api/patients';
+
+    function showMessage(text, type) {
+      var box = document.getElementById('message');
+      box.innerHTML = '';
+      var el = document.createElement('div');
+      el.className = 'alert alert-' + type + ' shadow-sm';
+      el.textContent = text;
+      box.appendChild(el);
+      setTimeout(function () { el.remove(); }, 4000);
+    }
+
+    function dateOnly(v) { return String(v).slice(0, 10); }
+
+    function resetForm() {
+      document.getElementById('patientForm').reset();
+      document.getElementById('patientId').value = '';
+      document.getElementById('saveBtn').textContent = 'Add';
+    }
+
+    async function loadPatients() {
+      try {
+        var res = await fetch(API);
+        if (!res.ok) throw new Error('Server returned ' + res.status);
+        var patients = await res.json();
+        var tbody = document.getElementById('patientTable');
+        tbody.innerHTML = '';
+        document.getElementById('empty').classList.toggle('d-none', patients.length > 0);
+
+        patients.forEach(function (p) {
+          var tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td></td><td></td><td></td><td></td>' +
+            '<td class="text-end text-nowrap">' +
+            '<button class="btn-mini me-1" type="button">Edit</button>' +
+            '<button class="btn-mini del" type="button">Delete</button></td>';
+          tr.children[0].textContent = p.id;
+          tr.children[1].textContent = p.name;
+          tr.children[2].textContent = dateOnly(p.birthdate);
+          tr.children[3].textContent = p.contact || '';
+          var btns = tr.querySelectorAll('button');
+          btns[0].onclick = function () { editPatient(p); };
+          btns[1].onclick = function () { deletePatient(p.id); };
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        showMessage('Could not load patients: ' + err.message, 'danger');
+      }
+    }
+
+    function editPatient(p) {
+      document.getElementById('patientId').value = p.id;
+      document.getElementById('name').value = p.name;
+      document.getElementById('birthdate').value = dateOnly(p.birthdate);
+      document.getElementById('contact').value = p.contact || '';
+      document.getElementById('saveBtn').textContent = 'Update';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function deletePatient(id) {
+      if (!confirm('Delete this patient and their appointments?')) return;
+      try {
+        var res = await fetch(API + '/' + id, { method: 'DELETE' });
+        var data = await res.json().catch(function () { return {}; });
+        showMessage(data.message || data.error || (res.ok ? 'Deleted' : 'Delete failed'), res.ok ? 'success' : 'danger');
+        loadPatients();
+      } catch (err) {
+        showMessage('Cannot reach the server. Is node server.js running?', 'danger');
+      }
+    }
+
+    document.getElementById('patientForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var id = document.getElementById('patientId').value;
+      var body = {
+        name: document.getElementById('name').value.trim(),
+        birthdate: document.getElementById('birthdate').value,
+        contact: document.getElementById('contact').value.trim()
+      };
+      try {
+        var res = await fetch(id ? API + '/' + id : API, {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        var data = await res.json().catch(function () { return {}; });
+        if (res.ok) {
+          showMessage(data.message || 'Saved', 'success');
+          resetForm();
+          loadPatients();
+        } else {
+          showMessage(data.error || ('Server error ' + res.status), 'danger');
+        }
+      } catch (err) {
+        showMessage('Cannot reach the server. Is node server.js running?', 'danger');
+      }
+    });
+
+    loadPatients();
+  </script>
+</body>
+</html>
