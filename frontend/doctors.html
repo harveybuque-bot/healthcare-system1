@@ -4,139 +4,371 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Doctors - Healthcare System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="style.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+  <style>
+    :root {
+      --bg: #f5f4fb;
+      --card: #ffffff;
+      --ink: #1f2340;
+      --soft: #7b809a;
+      --line: #ebe9f5;
+      --violet: #7c5cf0;
+      --violet-dark: #5b3fd1;
+      --violet-tint: #efeaff;
+      --teal: #0f9b8e;   --teal-tint: #dff5f1;
+      --amber: #d98200;  --amber-tint: #fff1dc;
+      --blue: #2f6fe0;   --blue-tint: #e3efff;
+      --green: #16794c;  --green-tint: #e2f6ec;
+      --red: #c8333f;    --red-tint: #fde9eb;
+      --radius: 16px;
+      --shadow: 0 1px 2px rgba(31,35,64,.04), 0 8px 24px rgba(31,35,64,.05);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    h1, h2, .brand-name { font-family: 'Fraunces', Georgia, serif; font-weight: 600; letter-spacing: -.01em; margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-      <a class="navbar-brand" href="index.html">Healthcare System</a>
-      <div class="navbar-nav">
-        <a class="nav-link" href="index.html">Dashboard</a>
-        <a class="nav-link" href="patients.html">Patients</a>
-        <a class="nav-link active" href="doctors.html">Doctors</a>
-        <a class="nav-link" href="appointments.html">Appointments</a>
-      </div>
-    </div>
-  </nav>
+    /* ===== Layout ===== */
+    .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
 
-  <div class="container my-4">
-    <h2>Doctors</h2>
-    <div id="message"></div>
+    /* ===== Sidebar ===== */
+    .sidebar {
+      background: var(--card);
+      border-right: 1px solid var(--line);
+      padding: 1.5rem 1rem;
+      position: sticky; top: 0; height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    .brand { display: flex; align-items: center; gap: .7rem; padding: 0 .6rem 1.5rem; text-decoration: none; color: var(--ink); }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 11px;
+      background: linear-gradient(135deg, var(--violet), #b58cf7);
+      display: grid; place-items: center; color: #fff;
+    }
+    .brand-name { font-size: 1.2rem; }
+    .menu { display: grid; gap: .25rem; }
+    .menu a {
+      display: flex; align-items: center; gap: .8rem;
+      padding: .7rem .9rem; border-radius: 12px;
+      color: var(--soft); font-weight: 500;
+      text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .menu a:hover { background: var(--bg); color: var(--ink); }
+    .menu a.active { background: var(--violet-tint); color: var(--violet-dark); font-weight: 600; }
+    .side-note {
+      margin-top: auto; padding: 1rem; border-radius: 14px;
+      background: var(--bg); color: var(--soft); font-size: .85rem;
+    }
+    .side-note strong { display: block; color: var(--ink); font-size: .9rem; margin-bottom: .15rem; }
 
-    <form id="doctorForm" class="row g-2 mb-4">
-      <input type="hidden" id="doctorId">
-      <div class="col-md-4">
-        <input type="text" id="name" class="form-control" placeholder="Full name" required>
-      </div>
-      <div class="col-md-3">
-        <input type="text" id="specialization" class="form-control" placeholder="Specialization" required>
-      </div>
-      <div class="col-md-3">
-        <select id="department" class="form-select" required>
-          <option value="">Select department</option>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100" id="saveBtn">Add</button>
-      </div>
-    </form>
+    /* ===== Main Content ===== */
+    .main { padding: 1.75rem 2.2rem 3rem; min-width: 0; }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; }
+    .topbar h1 { font-size: 1.9rem; }
+    .topbar p { margin: .15rem 0 0; color: var(--soft); font-size: .95rem; }
+    .user { display: flex; align-items: center; gap: .7rem; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: .35rem 1rem .35rem .4rem; }
+    .user .av { width: 34px; height: 34px; border-radius: 50%; background: var(--violet); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: .85rem; }
+    .user span { font-weight: 600; font-size: .9rem; }
 
-    <div class="table-responsive">
-      <table class="table table-striped bg-white">
-        <thead>
-          <tr><th>ID</th><th>Name</th><th>Specialization</th><th>Department</th><th>Actions</th></tr>
-        </thead>
-        <tbody id="doctorTable"></tbody>
-      </table>
-    </div>
-  </div>
+    .card-box { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.4rem; margin-bottom: 1.5rem; }
 
-  <script>
-    const API = '/api/doctors';
+    /* ===== Form Inputs & Buttons ===== */
+    .form-control, .form-select {
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: .65rem .95rem;
+      font-size: .92rem;
+      color: var(--ink);
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--violet);
+      box-shadow: 0 0 0 3px rgba(124, 92, 240, 0.15);
+    }
+    .btn-grad {
+      background: linear-gradient(135deg, var(--violet), var(--violet-dark));
+      color: #fff; border: 0; border-radius: 12px; font-weight: 600; padding: .65rem 1.2rem;
+      transition: transform .15s, opacity .15s;
+    }
+    .btn-grad:hover { color: #fff; transform: translateY(-1px); opacity: .95; }
+    .btn-subtle {
+      background: var(--bg); color: var(--ink); border: 1px solid var(--line);
+      border-radius: 12px; font-weight: 500; padding: .65rem 1.2rem;
+    }
+    .btn-subtle:hover { background: #edeaf7; color: var(--ink); }
 
-    function showMessage(text, type) {
-      const box = document.getElementById('message');
-      box.innerHTML = `<div class="alert alert-${type}"></div>`;
-      box.firstChild.textContent = text;
+    /* ===== Table ===== */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin: 0; }
+    th {
+      text-align: left; font-size: .78rem; font-weight: 600; color: var(--soft);
+      padding: .85rem 1.2rem; background: #faf9fe; border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line); text-transform: uppercase; letter-spacing: .05em;
+      white-space: nowrap;
+    }
+    td { padding: .95rem 1.2rem; border-bottom: 1px solid var(--line); vertical-align: middle; font-size: .92rem; }
+    tr:last-child td { border-bottom: 0; }
+    .who { display: flex; align-items: center; gap: .75rem; }
+    .av-sm {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--teal-tint);
+      color: var(--teal); display: grid; place-items: center; font-weight: 600;
+      font-size: .8rem; flex: 0 0 auto;
     }
 
-    async function loadDepartments() {
+    .badge-pill { display: inline-flex; align-items: center; padding: .25rem .75rem; border-radius: 999px; font-size: .78rem; font-weight: 600; }
+    .badge-teal { background: var(--teal-tint); color: var(--teal); }
+
+    .btn-action { border-radius: 8px; font-size: .78rem; font-weight: 600; padding: .32rem .75rem; border: 1px solid var(--line); background: #fff; transition: all .15s; }
+    .btn-edit-tbl { color: var(--soft); }
+    .btn-edit-tbl:hover { color: var(--violet-dark); border-color: var(--violet); }
+    .btn-del-tbl { color: var(--red); }
+    .btn-del-tbl:hover { background: var(--red); color: #fff; border-color: var(--red); }
+
+    #message { position: fixed; top: 1.5rem; right: 2rem; z-index: 3000; max-width: 380px; }
+
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; flex-direction: row; align-items: center; padding: .8rem 1rem; gap: 1rem; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+      .brand-name, .side-note { display: none; }
+      .menu { display: flex; }
+      .menu a { white-space: nowrap; padding: .55rem .8rem; }
+      .main { padding: 1.25rem 1rem 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <a class="brand" href="index.html" aria-label="Healthcare System home">
+      <span class="brand-mark">
+        <svg class="i" viewBox="0 0 24 24" stroke-width="2.2"><path d="M4.5 3h2M17.5 3h2"/><path d="M5.5 3v5a6.5 6.5 0 0 0 13 0V3"/><path d="M12 14.5v2a3.5 3.5 0 0 0 3.5 3.5H17a3 3 0 0 0 3-3V15"/><circle cx="20" cy="13" r="2" fill="currentColor"/></svg>
+      </span>
+      <span class="brand-name">Healthcare System</span>
+    </a>
+
+    <nav class="menu" aria-label="Main">
+      <a href="index.html">
+        <svg class="i" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Dashboard
+      </a>
+      <a href="patients.html">
+        <svg class="i" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Patients
+      </a>
+      <a class="active" href="doctors.html" aria-current="page">
+        <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Doctors
+      </a>
+      <a href="appointments.html">
+        <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Appointments
+      </a>
+    </nav>
+
+    <div class="side-note">
+      <strong>Medical Staff</strong>
+      Maintain doctor profiles, specializations, and departmental assignments.
+    </div>
+  </aside>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main">
+
+    <header class="topbar">
+      <div>
+        <h1>Doctors</h1>
+        <p id="today"></p>
+      </div>
+      <div class="user">
+        <span class="av">A</span>
+        <span>Admin</span>
+      </div>
+    </header>
+
+    <div id="message"></div>
+
+    <!-- Doctor Form Card -->
+    <div class="card-box">
+      <h2 style="font-size: 1.15rem; margin-bottom: 1rem;" id="formTitle">Add Doctor Profile</h2>
+      <form id="doctorForm" class="row g-2">
+        <input type="hidden" id="doctorId">
+        <div class="col-md-4">
+          <input type="text" id="name" class="form-control" placeholder="Full name (e.g. Dr. Maria Santos)" required>
+        </div>
+        <div class="col-md-3">
+          <input type="text" id="specialization" class="form-control" placeholder="Specialization (e.g. Cardiologist)" required>
+        </div>
+        <div class="col-md-3">
+          <select id="department" class="form-select" required>
+            <option value="">Select department</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+          <button type="submit" class="btn btn-grad flex-grow-1" id="saveBtn">Add</button>
+          <button type="button" class="btn btn-subtle" id="cancelBtn" onclick="resetForm()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Doctors Table Card -->
+    <div class="card-box p-0 overflow-hidden">
+      <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+        <h2 style="font-size: 1.15rem; margin: 0;">Medical Staff Directory</h2>
+        <span class="small text-muted" id="doctorCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Doctor Name</th>
+              <th>Specialization</th>
+              <th>Department</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="doctorTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  document.getElementById('today').textContent =
+    new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  const API = '/api/doctors';
+
+  function showMessage(text, type) {
+    const box = document.getElementById('message');
+    box.innerHTML = `<div class="alert alert-${type} shadow-sm border-0" style="border-radius:14px;"></div>`;
+    box.firstChild.textContent = text;
+    setTimeout(() => { if (box.firstChild) box.innerHTML = ''; }, 4000);
+  }
+
+  function initials(name) {
+    return String(name || '?').replace(/^Dr\.\s*/i, '').trim().split(/\s+/).slice(0, 2)
+      .map(w => w[0].toUpperCase()).join('');
+  }
+
+  function resetForm() {
+    document.getElementById('doctorForm').reset();
+    document.getElementById('doctorId').value = '';
+    document.getElementById('saveBtn').textContent = 'Add';
+    document.getElementById('formTitle').textContent = 'Add Doctor Profile';
+  }
+
+  async function loadDepartments() {
+    try {
       const res = await fetch('/api/departments');
       const departments = await res.json();
       const select = document.getElementById('department');
+      select.innerHTML = '<option value="">Select department</option>';
       departments.forEach(d => {
         const option = document.createElement('option');
         option.value = d.id;
         option.textContent = d.name;
         select.appendChild(option);
       });
+    } catch (err) {
+      showMessage('Could not load departments: ' + err.message, 'danger');
     }
+  }
 
-    async function loadDoctors() {
+  async function loadDoctors() {
+    try {
       const res = await fetch(API);
       const doctors = await res.json();
       const tbody = document.getElementById('doctorTable');
       tbody.innerHTML = '';
+      document.getElementById('doctorCount').textContent = `${doctors.length} total`;
+
       doctors.forEach(d => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${d.id}</td><td></td><td></td><td></td>
+          <td><strong>#${d.id}</strong></td>
           <td>
-            <button class="btn btn-sm btn-warning me-1">Edit</button>
-            <button class="btn btn-sm btn-danger">Delete</button>
+            <div class="who">
+              <span class="av-sm">${initials(d.name)}</span>
+              <b>${d.name}</b>
+            </div>
+          </td>
+          <td>${d.specialization}</td>
+          <td><span class="badge-pill badge-teal">${d.department}</span></td>
+          <td class="text-end text-nowrap">
+            <button class="btn-action btn-edit-tbl me-1">Edit</button>
+            <button class="btn-action btn-del-tbl">Delete</button>
           </td>`;
-        tr.children[1].textContent = d.name;
-        tr.children[2].textContent = d.specialization;
-        tr.children[3].textContent = d.department;
         const [editBtn, deleteBtn] = tr.querySelectorAll('button');
         editBtn.onclick = () => editDoctor(d);
         deleteBtn.onclick = () => deleteDoctor(d.id);
         tbody.appendChild(tr);
       });
+    } catch (err) {
+      showMessage('Could not load doctors: ' + err.message, 'danger');
     }
+  }
 
-    function editDoctor(d) {
-      document.getElementById('doctorId').value = d.id;
-      document.getElementById('name').value = d.name;
-      document.getElementById('specialization').value = d.specialization;
-      document.getElementById('department').value = d.department_id;
-      document.getElementById('saveBtn').textContent = 'Update';
-    }
+  function editDoctor(d) {
+    document.getElementById('doctorId').value = d.id;
+    document.getElementById('name').value = d.name;
+    document.getElementById('specialization').value = d.specialization;
+    document.getElementById('department').value = d.department_id;
+    document.getElementById('saveBtn').textContent = 'Update';
+    document.getElementById('formTitle').textContent = `Edit Doctor #${d.id}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-    async function deleteDoctor(id) {
-      if (!confirm('Delete this doctor?')) return;
+  async function deleteDoctor(id) {
+    if (!confirm('Delete this doctor?')) return;
+    try {
       const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      showMessage(data.message || data.error, res.ok ? 'success' : 'danger');
+      const data = await res.json().catch(() => ({}));
+      showMessage(data.message || data.error || (res.ok ? 'Deleted' : 'Delete failed'), res.ok ? 'success' : 'danger');
       loadDoctors();
+    } catch (err) {
+      showMessage('Cannot reach the server. Is node server.js running?', 'danger');
     }
+  }
 
-    document.getElementById('doctorForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('doctorId').value;
-      const body = {
-        name: document.getElementById('name').value.trim(),
-        specialization: document.getElementById('specialization').value.trim(),
-        department_id: document.getElementById('department').value
-      };
+  document.getElementById('doctorForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('doctorId').value;
+    const body = {
+      name: document.getElementById('name').value.trim(),
+      specialization: document.getElementById('specialization').value.trim(),
+      department_id: document.getElementById('department').value
+    };
+    try {
       const res = await fetch(id ? `${API}/${id}` : API, {
         method: id ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      const data = await res.json();
-      showMessage(data.message || data.error, res.ok ? 'success' : 'danger');
+      const data = await res.json().catch(() => ({}));
+      showMessage(data.message || data.error || (id ? 'Doctor updated' : 'Doctor created'), res.ok ? 'success' : 'danger');
       if (res.ok) {
-        e.target.reset();
-        document.getElementById('doctorId').value = '';
-        document.getElementById('saveBtn').textContent = 'Add';
+        resetForm();
         loadDoctors();
       }
-    });
+    } catch (err) {
+      showMessage('Cannot reach the server. Is node server.js running?', 'danger');
+    }
+  });
 
-    loadDepartments().then(loadDoctors);
-  </script>
+  loadDepartments().then(loadDoctors);
+</script>
 </body>
 </html>
